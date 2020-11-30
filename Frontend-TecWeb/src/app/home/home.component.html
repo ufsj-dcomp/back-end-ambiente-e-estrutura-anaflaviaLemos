@@ -1,0 +1,14 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+        <span>ClickHotel App </span>
+        <div>
+            <a mat-button [routerLink]= " '/home/hotel' ">Hoteis</a>
+            <a mat-buton [routerLink]= " '/home/reserva' ">Reservar</a>
+        </div>
+    </mat-toolbar-row>
+    
+</mat-toolbar>
+
+<div class = "container-fluid">
+    <router-outlet></router-outlet>
+</div>

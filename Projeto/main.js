@@ -1,17 +1,53 @@
 var express = require("express");
+var cors = require('cors');
+var jwt = require('jsonwebtoken');
 var app = express();
 
 var mysql = require("mysql");
 var connection = mysql.createConnection({
 	host:"localhost",
-	user: "tecweb",
-	password: "tecweb",
+	user: "root",
+	password: "",
 	database: "ClickBus"
 });
 
+app.use(cors());
 app.use(express.json());
 
-app.get("/hoteis", (req, resp) => {
+app.post('/auth', (req, resp) => {
+	var user = req.body;
+
+	connection.query("SELECT * FROM usuario WHERE nome = ? and senha = ? " ,  [user.nome, user.senha], (err, result) =>{
+		var usuario = result[0];
+
+		if(result.lenght ==0){
+			resp.status(401);
+			resp.send({token: null, usuario: usuario, success: false});
+		} else {
+			let token = jwt.sign({id: usuario.nome}, 'ClickBus', {expiresIn: 6000});
+			resp.status(200);
+			resp.send({token: token, usuario: usuario, success: true});
+		}
+	});
+});
+
+verifica_token = (req, resp, next) =>{
+	var token = req.headers['x-access-token'];
+
+	if (!token){
+		return resp.status(401).end();
+	}
+
+	jwt.verify(token, 'ClickBus', (err, docoded) => {
+		if(err)
+			return resp.status(401).end();
+
+		req.usuario = decoded.id;
+		next();
+	});
+}
+
+app.get("/hoteis", verifica_token, (req, resp) => {
 	console.log("GET - hoteis");
 
 	connection.query("SELECT * FROM hoteis", (err, result) => {
@@ -21,12 +57,12 @@ app.get("/hoteis", (req, resp) => {
 
   		} else {
   			resp.status(200);
-  			resp.json(result);
+  			resp.json(result.insertedId);
   		}
 	});
 });
 
-app.post("/hoteis", (req, resp) => {
+app.post("/hoteis", verifica_token, (req, resp) => {
   var hoteis = req.body;
   console.log("POST - Hoteis");
 
@@ -42,7 +78,7 @@ app.post("/hoteis", (req, resp) => {
   }); 
 });
 
-app.get("/hoteis/:hoteisId", (req, resp) => {
+app.get("/hoteis/:hoteisId", verifica_token, (req, resp) => {
   var hoteisId = req.params.hoteisId;
   console.log("GET - HoteisId: " + hoteisId);
 
@@ -58,7 +94,7 @@ app.get("/hoteis/:hoteisId", (req, resp) => {
   });  
 });
 
-app.put("/hoteis/:hoteisId", (req, resp) => {
+app.put("/hoteis/:hoteisId", verifica_token, (req, resp) => {
   var hoteisId = req.params.hoteisId;
   var hoteis = req.body();
   console.log("PUT - HoteisId: " + hoteisId);
@@ -74,7 +110,7 @@ app.put("/hoteis/:hoteisId", (req, resp) => {
   });
 });
 
-app.delete("/hoteis/:hoteisId", (req,resp) => {
+app.delete("/hoteis/:hoteisId", verifica_token, (req,resp) => {
   var hoteisId = req.params.hoteisId;
   console.log("DELETE - HoteisId: " + hoteisId);
 

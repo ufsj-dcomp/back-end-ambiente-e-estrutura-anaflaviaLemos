@@ -1,0 +1,23 @@
+<div class="login-wrapper">
+    <form class="login">
+        <section class="title">
+            <h3 class="welcome">Bem-Vindo ao ClickHotel</h3>
+            <p class="hint">Utilize o login e senha</p>
+        </section>
+        <div class="login-group">
+            <mat-form-field style="width: 100%;">
+                <mat-label>Nome de Usuario</mat-label>
+                <input matInput name="nome" [(ngModel)]="nome">
+            </mat-form-field>
+            <mat-form-field style="width: auto;">
+                <mat-label>Senha</mat-label>
+                <input matInput name="senha" [(ngModel)] ="senha">
+            </mat-form-field>
+            <div class="error active" *ngIf="authInvalido">
+                Nome de usuario ou senha inválidos
+            </div>
+            <button mat-raised-button (click)="auth()">Entrar</button>
+
+        </div>
+    </form>
+</div>
